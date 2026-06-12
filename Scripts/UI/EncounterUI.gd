@@ -69,9 +69,11 @@ func _on_encounter_started(char_id: String) -> void:
 		
 		# 利用全局事件总线自动恢复光照与图片
 		if has_sex:
-			EventBus.llm_tag_detected.emit("[上床]")
+			GameManager.current_phase = 3
+			EventBus.visual_phase_changed.emit(3)
 		elif has_lit:
-			EventBus.llm_tag_detected.emit("[开灯]")
+			GameManager.current_phase = 2
+			EventBus.visual_phase_changed.emit(2)
 			
 	else:
 		# 初见该角色，构建初始预设
@@ -93,12 +95,17 @@ func _build_ui() -> void:
 	panel_main = PanelContainer.new()
 	panel_main.set_anchors_preset(Control.PRESET_FULL_RECT)
 	var sb_main = StyleBoxFlat.new()
-	sb_main.bg_color = Color(0.08, 0.10, 0.15, 0.85) # BA暗色磨砂感
+	sb_main.bg_color = Color(1.0, 1.0, 1.0, 1.0) # 提供实色底板让 Shader 生效
 	sb_main.corner_radius_top_left = 30
 	sb_main.corner_radius_bottom_left = 30
 	sb_main.border_width_left = 2
 	sb_main.border_color = Color(0.3, 0.6, 0.9, 0.5)
 	panel_main.add_theme_stylebox_override("panel", sb_main)
+	
+	# 应用高级毛玻璃与颗粒噪声 Shader
+	var mat_main = ShaderMaterial.new()
+	mat_main.shader = load("res://Shaders/frosted_glass_noise.gdshader")
+	panel_main.material = mat_main
 	add_child(panel_main)
 	
 	var margin = MarginContainer.new()
@@ -112,9 +119,25 @@ func _build_ui() -> void:
 	vbox_root.add_theme_constant_override("separation", 20)
 	margin.add_child(vbox_root)
 	
-	# 顶部导航栏
+	# 顶部导航栏 (带斜线网格磨砂玻璃)
+	var top_panel = PanelContainer.new()
+	var sb_top = StyleBoxFlat.new()
+	sb_top.bg_color = Color(1.0, 1.0, 1.0, 1.0)
+	sb_top.corner_radius_top_left = 15; sb_top.corner_radius_bottom_right = 15; sb_top.corner_radius_top_right = 15; sb_top.corner_radius_bottom_left = 15
+	top_panel.add_theme_stylebox_override("panel", sb_top)
+	
+	var mat_top = ShaderMaterial.new()
+	mat_top.shader = load("res://Shaders/grid_frosted_glass.gdshader")
+	top_panel.material = mat_top
+	vbox_root.add_child(top_panel)
+	
+	var top_margin = MarginContainer.new()
+	top_margin.add_theme_constant_override("margin_left", 15); top_margin.add_theme_constant_override("margin_right", 15)
+	top_margin.add_theme_constant_override("margin_top", 10); top_margin.add_theme_constant_override("margin_bottom", 10)
+	top_panel.add_child(top_margin)
+	
 	var top_hbox = HBoxContainer.new()
-	vbox_root.add_child(top_hbox)
+	top_margin.add_child(top_hbox)
 	
 	var btn_home = _create_btn("🏠 撤退 (返回主菜单)", Color(0.8, 0.3, 0.4))
 	btn_home.pressed.connect(_on_btn_home_pressed)
@@ -170,14 +193,37 @@ func _build_ui() -> void:
 	input_field.placeholder_text = "在此输入你的动作或对话... (支持多行)"
 	input_field.add_theme_font_size_override("font_size", 22)
 	var sb_input = StyleBoxFlat.new()
-	sb_input.bg_color = Color(0.05, 0.06, 0.08, 0.9)
+	sb_input.bg_color = Color(0.05, 0.06, 0.08, 0.4) # 输入框也降透明度
 	sb_input.corner_radius_top_left = 15; sb_input.corner_radius_bottom_right = 15; sb_input.corner_radius_top_right = 15; sb_input.corner_radius_bottom_left = 15
 	sb_input.content_margin_left = 20; sb_input.content_margin_top = 20
+	# 霓虹发光边框
+	sb_input.border_width_left = 2; sb_input.border_width_top = 2; sb_input.border_width_right = 2; sb_input.border_width_bottom = 2
+	sb_input.border_color = Color(0.0, 0.9, 1.0, 0.8)
+	sb_input.shadow_size = 15
+	sb_input.shadow_color = Color(0.0, 0.9, 1.0, 0.3)
 	input_field.add_theme_stylebox_override("normal", sb_input)
 	bottom_hbox.add_child(input_field)
 	
-	btn_send = _create_btn("发 送\nSEND", Color(0.1, 0.6, 0.8)) # BA Blue
+	btn_send = Button.new()
+	btn_send.text = "发 送\nSEND"
+	btn_send.add_theme_font_size_override("font_size", 22)
 	btn_send.custom_minimum_size = Vector2(120, 0)
+	
+	var sb_send = StyleBoxFlat.new()
+	sb_send.bg_color = Color(0.1, 0.5, 0.7, 0.9)
+	sb_send.corner_radius_top_left = 15; sb_send.corner_radius_bottom_right = 15; sb_send.corner_radius_top_right = 15; sb_send.corner_radius_bottom_left = 15
+	sb_send.border_width_left = 2; sb_send.border_width_top = 2; sb_send.border_width_right = 2; sb_send.border_width_bottom = 2
+	sb_send.border_color = Color(0.0, 0.9, 1.0, 0.9)
+	sb_send.shadow_size = 18
+	sb_send.shadow_color = Color(0.0, 0.9, 1.0, 0.5)
+	
+	var sb_send_disabled = sb_send.duplicate()
+	sb_send_disabled.bg_color = Color(0.2, 0.2, 0.2, 0.9)
+	sb_send_disabled.border_color = Color(0.4, 0.4, 0.4, 0.5)
+	sb_send_disabled.shadow_color = Color(0.0, 0.0, 0.0, 0.0)
+	
+	btn_send.add_theme_stylebox_override("normal", sb_send)
+	btn_send.add_theme_stylebox_override("disabled", sb_send_disabled)
 	btn_send.pressed.connect(_on_btn_send_pressed)
 	bottom_hbox.add_child(btn_send)
 
@@ -218,8 +264,8 @@ func _on_btn_send_pressed() -> void:
 		# 当输入框为空，且最后一条消息是 user 时，作为【报错重试】功能
 		if current_context.size() > 0 and current_context[-1].has("role") and current_context[-1].role == "user":
 			if builder and llm:
-				var char_id = GameManager.current_char_id.to_upper()
-				var prefill_text = "</think>\n<thinking>\nOK，后台系统Miku上线！我要严格遵守隔离规则，接下来的正文内容必须完全交由【" + char_id + "】来扮演，除非Master明确呼叫系统管理员^_^。OK，Master刚才的行动是"
+				var char_id = GameManager.current_char_id
+				var prefill_text = builder.get_assistant_prefill(char_id)
 				current_context.append({
 					"role": "assistant",
 					"content": prefill_text
@@ -331,6 +377,10 @@ func load_context_from_slot(slot_name: String) -> void:
 						if "[开灯]" in cmds: has_lit = true
 						if "[上床]" in cmds: has_sex = true
 			
+			# 【终极修复】：在回滚任何状态之前，必须先把全局状态机清零。
+			# 否则，如果从色色(3)回滚到开灯(2)，发射[开灯]信号时，GameManager会因为 3 > 2 而拒绝执行！
+			GameManager.current_phase = 1
+			
 			if has_sex:
 				EventBus.llm_tag_detected.emit("[上床]")
 			elif has_lit:
@@ -349,10 +399,10 @@ func _add_message_bubble(sender: String, text: String, is_player: bool, think_tx
 	sb.content_margin_left = 25; sb.content_margin_right = 25; sb.content_margin_top = 20; sb.content_margin_bottom = 20
 	
 	if is_player:
-		sb.bg_color = Color(0.2, 0.4, 0.6, 0.8) # 玩家蓝色
+		sb.bg_color = Color(0.2, 0.4, 0.6, 0.25) # 极低透明度，让水波纹透出来
 		panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	else:
-		sb.bg_color = Color(0.15, 0.15, 0.18, 0.9) # 角色深色
+		sb.bg_color = Color(0.1, 0.1, 0.15, 0.35) # 极低透明度，让水波纹透出来
 		panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		
 	panel.add_theme_stylebox_override("panel", sb)
@@ -490,7 +540,8 @@ func _on_btn_rollback_pressed(index: int) -> void:
 	
 	# 2. 重新拼接纯净的 Prefill
 	var char_id = GameManager.current_char_id
-	var prefill_text = "</think>\n<thinking>\nOK，后台系统Miku上线！我要严格遵守隔离规则，接下来的正文内容必须完全交由【" + char_id.to_upper() + "】来扮演，除非Master明确呼叫系统管理员^_^。OK，Master刚才的行动是"
+	var builder = get_node_or_null("/root/PromptBuilder")
+	var prefill_text = builder.get_assistant_prefill(char_id) if builder else ""
 	current_context.append({
 		"role": "assistant",
 		"content": prefill_text
@@ -508,10 +559,14 @@ func _on_btn_rollback_pressed(index: int) -> void:
 				if "[开灯]" in cmds: has_lit = true
 				if "[上床]" in cmds: has_sex = true
 	
+	GameManager.current_phase = 1 # 强制同步状态机
+	
 	if has_sex:
-		EventBus.llm_tag_detected.emit("[上床]")
+		GameManager.current_phase = 3
+		EventBus.visual_phase_changed.emit(3)
 	elif has_lit:
-		EventBus.llm_tag_detected.emit("[开灯]")
+		GameManager.current_phase = 2
+		EventBus.visual_phase_changed.emit(2)
 	else:
 		EventBus.visual_phase_changed.emit(1)
 		

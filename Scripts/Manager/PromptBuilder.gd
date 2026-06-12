@@ -83,6 +83,10 @@ func build_initial_context(char_id: String) -> Array:
 	
 	return context_array
 
+## 获取全局唯一的 Assistant 预填充模板 (防止多处硬编码导致修改不生效)
+func get_assistant_prefill(char_id: String) -> String:
+	return "</think>\n<thinking>\nOK，后台系统Miku上线！我要严格遵守隔离规则，思考完成后的正文内容必须完全交由【" + char_id.to_upper() + "】来扮演，确保故事足够长，除非Master明确呼叫系统管理员^_^。OK，Master刚才的行动是"
+
 ## 处理玩家新发送的消息，并在末尾挂载强制的标签劫持
 func append_user_message_with_prefill(context_array: Array, user_text: String, char_id: String) -> Array:
 	# 先压入玩家真实说的话
@@ -93,7 +97,7 @@ func append_user_message_with_prefill(context_array: Array, user_text: String, c
 	
 	# 然后压入一段假的 assistant 预填充文本，强制模型从 thinking 开始续写
 	# 【终极防穿帮】：在最后几个字再次按着模型的头，强迫它记住现在该扮演谁！
-	var prefill_text = "</think>\n<thinking>\nOK，后台系统Miku上线！我要严格遵守隔离规则，接下来的正文内容必须完全交由【" + char_id.to_upper() + "】来扮演，除非Master明确呼叫系统管理员^_^。OK，Master刚才的行动是"
+	var prefill_text = get_assistant_prefill(char_id)
 	context_array.append({
 		"role": "assistant",
 		"content": prefill_text

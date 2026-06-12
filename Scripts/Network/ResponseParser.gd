@@ -88,8 +88,10 @@ func parse_full_response(full_text: String) -> void:
 
 ## 检查并触发系统级标签
 func _check_and_fire_tags(cmds_text: String) -> void:
-	if "[开灯]" in cmds_text:
+	# 【修复 Bug】：大模型可能会自作主张把英文方括号 [] 改成中文 【】，
+	# 或者不小心加了空格。因此我们直接检索核心关键词以增加鲁棒性。
+	if "开灯" in cmds_text:
 		EventBus.llm_tag_detected.emit("[开灯]")
 		
-	if "[上床]" in cmds_text:
+	if "上床" in cmds_text:
 		EventBus.llm_tag_detected.emit("[上床]")

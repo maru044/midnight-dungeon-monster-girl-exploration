@@ -58,12 +58,12 @@ func _on_encounter_ended() -> void:
 
 func _on_llm_tag_detected(tag: String) -> void:
 	if tag == "[开灯]":
-		if current_phase < VisualPhase.PHASE_2_NORMAL:
+		if current_phase <= VisualPhase.PHASE_2_NORMAL:
 			current_phase = VisualPhase.PHASE_2_NORMAL
 			EventBus.visual_phase_changed.emit(current_phase)
 			
 	elif tag == "[上床]":
-		if current_phase < VisualPhase.PHASE_3_SEX:
+		if current_phase <= VisualPhase.PHASE_3_SEX:
 			current_phase = VisualPhase.PHASE_3_SEX
 			EventBus.visual_phase_changed.emit(current_phase)
 

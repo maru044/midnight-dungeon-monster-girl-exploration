@@ -77,8 +77,10 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 		return
 		
 	# 正常情况：拼接预填充并交给解析器处理
-	var char_id = GameManager.current_char_id.to_upper()
-	var final_text = "</think>\n<thinking>\nOK，后台系统Miku上线！我要严格遵守隔离规则，接下来的正文内容必须完全交由【" + char_id + "】来扮演，除非Master明确呼叫系统管理员^_^。OK，Master刚才的行动是" + parsed_text
+	var char_id = GameManager.current_char_id
+	var builder = get_node_or_null("/root/PromptBuilder")
+	var prefill = builder.get_assistant_prefill(char_id) if builder else ""
+	var final_text = prefill + parsed_text
 	
 	ResponseParser.parse_full_response(final_text)
 

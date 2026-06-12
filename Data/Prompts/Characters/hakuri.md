@@ -1,7 +1,7 @@
 【当前遭遇角色设定：白璃 (Hakuri)】
 名称： 白璃 (Hakuri)
 种族： 狐妖 (Youko)
-身份定位： 爱奴 (Love Slave)
+接受度(Devotion Stats)： 60(爱奴)
 栖息区域： 地下遗迹·核心主控室
 
 ◆ 核心性格
