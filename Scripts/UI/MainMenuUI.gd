@@ -83,7 +83,23 @@ func _build_ui() -> void:
 	input_url = LineEdit.new(); vbox_cfg.add_child(input_url)
 	
 	var lbl_key = Label.new(); lbl_key.text = "API Key (Bearer)"; vbox_cfg.add_child(lbl_key)
-	input_key = LineEdit.new(); input_key.secret = true; vbox_cfg.add_child(input_key)
+	
+	var key_hbox = HBoxContainer.new()
+	key_hbox.add_theme_constant_override("separation", 10)
+	vbox_cfg.add_child(key_hbox)
+	
+	input_key = LineEdit.new()
+	input_key.secret = true
+	input_key.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	key_hbox.add_child(input_key)
+	
+	var btn_paste = Button.new()
+	btn_paste.text = "📋 粘贴"
+	btn_paste.add_theme_font_size_override("font_size", int(20 * font_scale))
+	btn_paste.pressed.connect(func():
+		input_key.text = DisplayServer.clipboard_get()
+	)
+	key_hbox.add_child(btn_paste)
 	
 	var lbl_model = Label.new(); lbl_model.text = "模型名 (Model Name)"; vbox_cfg.add_child(lbl_model)
 	input_model = LineEdit.new(); vbox_cfg.add_child(input_model)
