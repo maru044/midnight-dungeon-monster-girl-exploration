@@ -30,6 +30,11 @@ LLM_Client="*res://Scripts/Network/LLM_Client.gd"
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 
+[gui]
+
+theme/custom="res://default_theme.tres"
+theme/custom_font="res://Fonts/SmileySans-Oblique.otf"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
