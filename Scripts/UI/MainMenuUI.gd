@@ -17,6 +17,9 @@ func _ready() -> void:
 	_build_ui()
 
 func _build_ui() -> void:
+	var is_mobile = OS.has_feature("web_android") or OS.has_feature("web_ios") or OS.has_feature("mobile")
+	var font_scale = 1.6 if is_mobile else 1.0
+
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	
 	# 深色背景
@@ -60,7 +63,7 @@ func _build_ui() -> void:
 	
 	var title = Label.new()
 	title.text = "大模型终端配置 (API Config)"
-	title.add_theme_font_size_override("font_size", 28)
+	title.add_theme_font_size_override("font_size", int(28 * font_scale))
 	title.add_theme_color_override("font_color", Color(0.3, 0.8, 0.9))
 	vbox_cfg.add_child(title)
 	
@@ -120,7 +123,7 @@ func _build_ui() -> void:
 	
 	var title_char = Label.new()
 	title_char.text = "开始深夜遭遇战"
-	title_char.add_theme_font_size_override("font_size", 36)
+	title_char.add_theme_font_size_override("font_size", int(36 * font_scale))
 	title_char.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox_chars.add_child(title_char)
 	
@@ -130,12 +133,12 @@ func _build_ui() -> void:
 		if not save_mgr: return true
 		return not save_mgr.has_encountered(c_id)
 		
-	_add_char_btn(vbox_chars, "hakuri", "🦊 遭遇：狐妖 白璃 (Hakuri)", is_locked.call("hakuri"))
-	_add_char_btn(vbox_chars, "hiba", "🦟 遭遇：蚊子娘 绯羽 (Hiba)", is_locked.call("hiba"))
-	_add_char_btn(vbox_chars, "shion", "🐉 遭遇：龙娘 紫音 (Shion)", is_locked.call("shion"))
+	_add_char_btn(vbox_chars, "hakuri", "🦊 遭遇：狐妖 白璃 (Hakuri)", is_locked.call("hakuri"), font_scale)
+	_add_char_btn(vbox_chars, "hiba", "🦟 遭遇：蚊子娘 绯羽 (Hiba)", is_locked.call("hiba"), font_scale)
+	_add_char_btn(vbox_chars, "shion", "🐉 遭遇：龙娘 紫音 (Shion)", is_locked.call("shion"), font_scale)
 	
 	# 随机抽取是不受限制的唯一合法入口
-	var btn_random = _add_char_btn(vbox_chars, "random", "🎲 命运指引 (深入黑暗随机遭遇)", false)
+	var btn_random = _add_char_btn(vbox_chars, "random", "🎲 命运指引 (深入黑暗随机遭遇)", false, font_scale)
 	var sb_rnd = btn_random.get_theme_stylebox("normal").duplicate()
 	sb_rnd.bg_color = Color(0.6, 0.4, 0.8)
 	btn_random.add_theme_stylebox_override("normal", sb_rnd)
@@ -171,10 +174,10 @@ func _refresh_api_inputs(type_str: String) -> void:
 	input_temp.text = str(cfg.get("temp", 1.0))
 	input_top_p.text = str(cfg.get("top_p", 0.9))
 
-func _add_char_btn(parent: Control, char_id: String, text: String, locked: bool = false) -> Button:
+func _add_char_btn(parent: Control, char_id: String, text: String, locked: bool = false, font_scale: float = 1.0) -> Button:
 	var btn = Button.new()
 	btn.custom_minimum_size = Vector2(0, 80)
-	btn.add_theme_font_size_override("font_size", 24)
+	btn.add_theme_font_size_override("font_size", int(24 * font_scale))
 	
 	var sb = StyleBoxFlat.new()
 	sb.corner_radius_top_left = 15; sb.corner_radius_bottom_right = 15; sb.corner_radius_top_right = 15; sb.corner_radius_bottom_left = 15

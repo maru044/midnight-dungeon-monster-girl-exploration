@@ -37,6 +37,10 @@ var api_configs: Dictionary = {
 
 const CONFIG_PATH = "user://api_config.json"
 
+func get_scaled_size(base_size: float) -> int:
+	var is_mobile = OS.has_feature("web_android") or OS.has_feature("web_ios") or OS.has_feature("mobile")
+	return int(base_size * 1.6) if is_mobile else int(base_size)
+
 func _ready() -> void:
 	load_api_config()
 	EventBus.llm_tag_detected.connect(_on_llm_tag_detected)

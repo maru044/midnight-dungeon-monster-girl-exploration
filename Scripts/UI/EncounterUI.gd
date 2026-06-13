@@ -85,9 +85,9 @@ func _on_encounter_started(char_id: String) -> void:
 ## ---------------------------------------------------------
 
 func _build_ui() -> void:
-	# 设置自身占据屏幕右侧
-	set_anchors_preset(Control.PRESET_RIGHT_WIDE)
-	offset_left = -1312 # 1920 - 608(立绘宽度) = 1312
+	# 设置自身铺满屏幕，但避开左侧 608 像素的立绘区域
+	set_anchors_preset(Control.PRESET_FULL_RECT)
+	offset_left = 608
 	offset_right = 0
 	offset_top = 0
 	offset_bottom = 0
@@ -191,7 +191,7 @@ func _build_ui() -> void:
 	input_field = TextEdit.new()
 	input_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	input_field.placeholder_text = "在此输入你的动作或对话... (支持多行)"
-	input_field.add_theme_font_size_override("font_size", 22)
+	input_field.add_theme_font_size_override("font_size", GameManager.get_scaled_size(22))
 	var sb_input = StyleBoxFlat.new()
 	sb_input.bg_color = Color(0.05, 0.06, 0.08, 0.4) # 输入框也降透明度
 	sb_input.corner_radius_top_left = 15; sb_input.corner_radius_bottom_right = 15; sb_input.corner_radius_top_right = 15; sb_input.corner_radius_bottom_left = 15
@@ -206,7 +206,7 @@ func _build_ui() -> void:
 	
 	btn_send = Button.new()
 	btn_send.text = "发 送\nSEND"
-	btn_send.add_theme_font_size_override("font_size", 22)
+	btn_send.add_theme_font_size_override("font_size", GameManager.get_scaled_size(22))
 	btn_send.custom_minimum_size = Vector2(120, 0)
 	
 	var sb_send = StyleBoxFlat.new()
@@ -230,7 +230,7 @@ func _build_ui() -> void:
 func _create_btn(txt: String, color: Color) -> Button:
 	var btn = Button.new()
 	btn.text = txt
-	btn.add_theme_font_size_override("font_size", 18)
+	btn.add_theme_font_size_override("font_size", GameManager.get_scaled_size(18))
 	var sb = StyleBoxFlat.new()
 	sb.bg_color = color
 	sb.corner_radius_top_left = 10; sb.corner_radius_bottom_right = 10; sb.corner_radius_top_right = 10; sb.corner_radius_bottom_left = 10
@@ -382,9 +382,11 @@ func load_context_from_slot(slot_name: String) -> void:
 			GameManager.current_phase = 1
 			
 			if has_sex:
-				EventBus.llm_tag_detected.emit("[上床]")
+				GameManager.current_phase = 3
+				EventBus.visual_phase_changed.emit(3)
 			elif has_lit:
-				EventBus.llm_tag_detected.emit("[开灯]")
+				GameManager.current_phase = 2
+				EventBus.visual_phase_changed.emit(2)
 			else:
 				EventBus.visual_phase_changed.emit(1)
 
@@ -416,7 +418,7 @@ func _add_message_bubble(sender: String, text: String, is_player: bool, think_tx
 
 	var name_lbl = Label.new()
 	name_lbl.text = sender
-	name_lbl.add_theme_font_size_override("font_size", 18)
+	name_lbl.add_theme_font_size_override("font_size", GameManager.get_scaled_size(18))
 	name_lbl.add_theme_color_override("font_color", Color(0.9, 0.7, 0.4) if not is_player else Color(0.8, 0.9, 1.0))
 	top_bar.add_child(name_lbl)
 	
@@ -457,10 +459,10 @@ func _add_message_bubble(sender: String, text: String, is_player: bool, think_tx
 		rtb.add_theme_font_override("italics_font", custom_font)
 		rtb.add_theme_font_override("bold_italics_font", custom_font)
 		
-	rtb.add_theme_font_size_override("normal_font_size", 22)
-	rtb.add_theme_font_size_override("bold_font_size", 26)
-	rtb.add_theme_font_size_override("italics_font_size", 22)
-	rtb.add_theme_font_size_override("bold_italics_font_size", 26)
+	rtb.add_theme_font_size_override("normal_font_size", GameManager.get_scaled_size(22))
+	rtb.add_theme_font_size_override("bold_font_size", GameManager.get_scaled_size(26))
+	rtb.add_theme_font_size_override("italics_font_size", GameManager.get_scaled_size(22))
+	rtb.add_theme_font_size_override("bold_italics_font_size", GameManager.get_scaled_size(26))
 	vbox.add_child(rtb)
 	
 	if think_txt != "":
@@ -469,7 +471,7 @@ func _add_message_bubble(sender: String, text: String, is_player: bool, think_tx
 		think_rtb.fit_content = true
 		think_rtb.selection_enabled = true
 		think_rtb.text = "[color=#888888][i]<Miku 的思维链>\n" + think_txt + "[/i][/color]"
-		think_rtb.add_theme_font_size_override("normal_font_size", 18)
+		think_rtb.add_theme_font_size_override("normal_font_size", GameManager.get_scaled_size(18))
 		think_rtb.add_to_group("thinking_nodes") # 方便后续一键显隐
 		think_rtb.visible = is_thinking_visible
 		vbox.add_child(think_rtb)
@@ -484,7 +486,7 @@ func _add_system_message(text: String) -> void:
 	rtb.fit_content = true
 	rtb.selection_enabled = true
 	rtb.text = "[center][color=#808080]—— " + text + " ——[/color][/center]"
-	rtb.add_theme_font_size_override("normal_font_size", 16)
+	rtb.add_theme_font_size_override("normal_font_size", GameManager.get_scaled_size(16))
 	vbox_chat.add_child(rtb)
 
 func _refresh_thinking_visibility() -> void:
@@ -501,7 +503,7 @@ func _on_btn_edit_user_msg_pressed(vbox: VBoxContainer, rtb: RichTextLabel, msg_
 	
 	var text_edit = TextEdit.new()
 	text_edit.custom_minimum_size = Vector2(0, 100)
-	text_edit.add_theme_font_size_override("font_size", 22)
+	text_edit.add_theme_font_size_override("font_size", GameManager.get_scaled_size(22))
 	
 	# 脱壳：提取原本纯净的用户输入
 	var raw_msg = current_context[msg_index].content

@@ -34,6 +34,9 @@ func _ready() -> void:
 		_on_file_selected(0)
 
 func _build_ui() -> void:
+	var is_mobile = OS.has_feature("web_android") or OS.has_feature("web_ios") or OS.has_feature("mobile")
+	var font_scale = 1.6 if is_mobile else 1.0
+
 	var panel = PanelContainer.new()
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color(0.1, 0.12, 0.15, 0.98)
@@ -59,13 +62,13 @@ func _build_ui() -> void:
 	
 	var title_lbl = Label.new()
 	title_lbl.text = "预设文件清单 (V1.0)"
-	title_lbl.add_theme_font_size_override("font_size", 22)
+	title_lbl.add_theme_font_size_override("font_size", int(22 * font_scale))
 	title_lbl.add_theme_color_override("font_color", Color(0.4, 0.8, 0.6))
 	left_vbox.add_child(title_lbl)
 	
 	list_files = ItemList.new()
 	list_files.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	list_files.add_theme_font_size_override("font_size", 18)
+	list_files.add_theme_font_size_override("font_size", int(18 * font_scale))
 	for f in _available_files:
 		list_files.add_item(f)
 	list_files.item_selected.connect(_on_file_selected)
@@ -79,7 +82,7 @@ func _build_ui() -> void:
 	
 	text_editor = TextEdit.new()
 	text_editor.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	text_editor.add_theme_font_size_override("font_size", 18)
+	text_editor.add_theme_font_size_override("font_size", int(18 * font_scale))
 	var sb_edit = StyleBoxFlat.new()
 	sb_edit.bg_color = Color(0.05, 0.05, 0.07, 1.0)
 	sb_edit.content_margin_left = 15; sb_edit.content_margin_top = 15
@@ -89,7 +92,7 @@ func _build_ui() -> void:
 	btn_save = Button.new()
 	btn_save.text = "💾 保存当前文件并全系统热重载"
 	btn_save.custom_minimum_size = Vector2(0, 60)
-	btn_save.add_theme_font_size_override("font_size", 22)
+	btn_save.add_theme_font_size_override("font_size", int(22 * font_scale))
 	var sb_btn = StyleBoxFlat.new()
 	sb_btn.bg_color = Color(0.2, 0.6, 0.4)
 	sb_btn.corner_radius_top_left = 8; sb_btn.corner_radius_bottom_right = 8; sb_btn.corner_radius_top_right = 8; sb_btn.corner_radius_bottom_left = 8

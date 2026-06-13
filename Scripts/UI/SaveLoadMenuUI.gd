@@ -30,6 +30,9 @@ func _ready() -> void:
 	_build_ui()
 
 func _build_ui() -> void:
+	var is_mobile = OS.has_feature("web_android") or OS.has_feature("web_ios") or OS.has_feature("mobile")
+	var font_scale = 1.6 if is_mobile else 1.0
+
 	var panel = PanelContainer.new()
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color(0.12, 0.14, 0.18, 0.95)
@@ -56,13 +59,13 @@ func _build_ui() -> void:
 	
 	var title_lbl = Label.new()
 	title_lbl.text = "存档列表"
-	title_lbl.add_theme_font_size_override("font_size", 28)
+	title_lbl.add_theme_font_size_override("font_size", int(28 * font_scale))
 	title_lbl.add_theme_color_override("font_color", Color(0.4, 0.8, 0.9))
 	left_vbox.add_child(title_lbl)
 	
 	save_list = ItemList.new()
 	save_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	save_list.add_theme_font_size_override("font_size", 20)
+	save_list.add_theme_font_size_override("font_size", int(20 * font_scale))
 	var list_sb = StyleBoxFlat.new()
 	list_sb.bg_color = Color(0.05, 0.05, 0.08, 0.6)
 	save_list.add_theme_stylebox_override("panel", list_sb)
@@ -93,26 +96,26 @@ func _build_ui() -> void:
 	
 	var op_title = Label.new()
 	op_title.text = "操作"
-	op_title.add_theme_font_size_override("font_size", 28)
+	op_title.add_theme_font_size_override("font_size", int(28 * font_scale))
 	right_vbox.add_child(op_title)
 	
-	btn_load = _create_action_btn("📂 读取存档", Color(0.2, 0.5, 0.8))
+	btn_load = _create_action_btn("📂 读取存档", Color(0.2, 0.5, 0.8), font_scale)
 	btn_load.pressed.connect(_on_load_pressed)
 	right_vbox.add_child(btn_load)
 	
-	btn_overwrite = _create_action_btn("💾 覆盖存档", Color(0.8, 0.6, 0.2))
+	btn_overwrite = _create_action_btn("💾 覆盖存档", Color(0.8, 0.6, 0.2), font_scale)
 	btn_overwrite.pressed.connect(_on_overwrite_pressed)
 	right_vbox.add_child(btn_overwrite)
 	
-	btn_delete = _create_action_btn("🗑️ 删除存档", Color(0.8, 0.3, 0.3))
+	btn_delete = _create_action_btn("🗑️ 删除存档", Color(0.8, 0.3, 0.3), font_scale)
 	btn_delete.pressed.connect(_on_delete_pressed)
 	right_vbox.add_child(btn_delete)
 
-func _create_action_btn(text: String, color: Color) -> Button:
+func _create_action_btn(text: String, color: Color, font_scale: float = 1.0) -> Button:
 	var btn = Button.new()
 	btn.text = text
 	btn.custom_minimum_size = Vector2(0, 60)
-	btn.add_theme_font_size_override("font_size", 22)
+	btn.add_theme_font_size_override("font_size", int(22 * font_scale))
 	var sb = StyleBoxFlat.new()
 	sb.bg_color = color
 	sb.corner_radius_top_left = 12; sb.corner_radius_bottom_right = 12; sb.corner_radius_top_right = 12; sb.corner_radius_bottom_left = 12
