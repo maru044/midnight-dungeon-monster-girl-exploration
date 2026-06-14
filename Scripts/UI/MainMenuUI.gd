@@ -67,6 +67,16 @@ func _build_ui() -> void:
 	title.add_theme_color_override("font_color", Color(0.3, 0.8, 0.9))
 	vbox_cfg.add_child(title)
 	
+	var btn_fs = Button.new()
+	btn_fs.text = "🔲 切换全屏 (Toggle Fullscreen)"
+	btn_fs.add_theme_font_size_override("font_size", int(20 * font_scale))
+	btn_fs.pressed.connect(_on_toggle_fullscreen)
+	var sb_fs = StyleBoxFlat.new()
+	sb_fs.bg_color = Color(0.2, 0.4, 0.6, 0.8)
+	sb_fs.corner_radius_top_left = 8; sb_fs.corner_radius_bottom_right = 8; sb_fs.corner_radius_top_right = 8; sb_fs.corner_radius_bottom_left = 8
+	btn_fs.add_theme_stylebox_override("normal", sb_fs)
+	vbox_cfg.add_child(btn_fs)
+	
 	# 下拉菜单 API Type
 	var lbl_type = Label.new(); lbl_type.text = "API 专区选择"; vbox_cfg.add_child(lbl_type)
 	opt_type = OptionButton.new()
@@ -177,6 +187,12 @@ func _build_ui() -> void:
 		btn_save_cfg.text = "保存配置"
 	)
 	vbox_cfg.add_child(btn_save_cfg)
+
+func _on_toggle_fullscreen() -> void:
+	if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 
 func _on_api_type_changed(idx: int) -> void:
 	var type_str = "gemini" if idx == 0 else "deepseek"

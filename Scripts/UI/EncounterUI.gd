@@ -159,6 +159,15 @@ func _build_ui() -> void:
 	)
 	top_hbox.add_child(btn_editor)
 	
+	var btn_fs = _create_btn("🔲 全屏", Color(0.3, 0.5, 0.7))
+	btn_fs.pressed.connect(func():
+		if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+		else:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	)
+	top_hbox.add_child(btn_fs)
+	
 	var spacer = Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top_hbox.add_child(spacer)
